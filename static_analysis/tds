@@ -9,7 +9,7 @@ pipeline {
         PAYLOAD = "Unidata_tds.tgz"
         BUILD_TOOL_VERSION = "2023.12.2"
         COV_DIR = "cov-analysis-linux64-${BUILD_TOOL_VERSION}"
-        WAR_PATH = "build/downloads/thredds-5.5-SNAPSHOT.war"
+        WAR_PATH = "build/downloads/thredds-5.6-SNAPSHOT.war"
     }
     stages {
         stage('Fetch project from GitHub') {
