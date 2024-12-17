@@ -1,5 +1,5 @@
 pipeline {
-    agent  { label 'jenkins-worker' } 
+    agent  { label 'jenkins-worker' }
     environment {
         JAVA_HOME = "/usr/thredds-test-environment/temurin11"
         TO = "thredds-developers@unidata.ucar.edu"
@@ -12,40 +12,37 @@ pipeline {
                 checkout([
                     $class                           : 'GitSCM',
                     branches                         : [[name: "*/maint-5.x"]],
-                    userRemoteConfigs                : [[credentialsId: 'user', url: 'https://github.com/Unidata/netcdf-java']],
+                    userRemoteConfigs                : [[url: 'https://github.com/Unidata/netcdf-java']],
+                    extensions                       : [cloneOption(depth: 1, noTags: true, reference: '', shallow: true)],
                     doGenerateSubmoduleConfigurations: false
                 ])
             }
         }
         stage('Assemble Project') {
             steps {
-                sh '''
-                   #!/bin/bash
+                sh '''#!/bin/bash -l
                    select-java temurin 11
                    chmod u+x gradlew
-                   ./gradlew assemble
+                   ./gradlew clean assemble
                 '''
             }
         }
         stage('Scan Dependencies') {
             steps {
-                withCredentials([string(credentialsId: 'NVD_API_Key', variable: 'API_KEY')]) {
-                    dependencyCheck additionalArguments: '--format HTML --format XML --suppression project-files/owasp-dependency-check/dependency-check-suppression.xml --nvdApiKey $API_KEY', odcInstallation: 'OWASP', stopBuild: true
-                    step([
-                        $class:                 'DependencyCheckPublisher',
-                        pattern:                '**/dependency-check-report.xml', 
-                        failedTotalCritical:    1,
-                        failedTotalHigh:        1,
-                        failedTotalLow:         1,
-                        failedTotalMedium:      1
-                    ])
-                }
+                dependencyCheck additionalArguments: '--format HTML --format XML --suppression project-files/owasp-dependency-check/dependency-check-suppression.xml --data $NVD_DATA', nvdCredentialsId: 'NVD_API_Key', odcInstallation: 'OWASP', stopBuild: false
+                step([
+                    $class:                 'DependencyCheckPublisher',
+                    pattern:                '**/dependency-check-report.xml',
+                    failedTotalCritical:    1,
+                    failedTotalHigh:        1,
+                    failedTotalLow:         1,
+                    failedTotalMedium:      1
+                ])
             }
         }
         stage('Publish Report') {
             steps {
-                sh '''
-                    #!/bin/bash
+                sh '''#!/bin/bash
                     if [ ! -d build/reports ]; then
                         mkdir build/reports/
                     fi

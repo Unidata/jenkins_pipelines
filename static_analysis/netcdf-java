@@ -16,7 +16,7 @@ pipeline {
                 checkout([
                     $class                           : 'GitSCM',
                     branches                         : [[name: "*/maint-5.x"]],
-                    userRemoteConfigs                : [[credentialsId: 'user', url: 'https://github.com/Unidata/netcdf-java']],
+                    userRemoteConfigs                : [[url: 'https://github.com/Unidata/netcdf-java']],
                     doGenerateSubmoduleConfigurations: false
                 ])
             }
@@ -24,8 +24,7 @@ pipeline {
         stage('Get build tool') {
             steps {
                 withCredentials([string(credentialsId: 'NETCDF-JAVA_COVERITY', variable: 'TOKEN')]) {
-                    sh '''
-                        #!/bin/bash
+                    sh '''#!/bin/bash -l
                         rm -rf cov-analysis*
                         curl -d "token=${TOKEN}&project=${COV_PROJECT}" -X POST https://scan.coverity.com/download/linux64 -o cov-analysis.tgz
                         if [[ ! -f cov-analysis.tgz ]]; then
@@ -42,8 +41,7 @@ pipeline {
         }
         stage('Build project') {
             steps {
-                sh '''
-                    #!/bin/bash
+                sh '''#!/bin/bash -l
                     ./gradlew --no-daemon clean
                     PATH=${COV_DIR}/bin:$PATH
                     cov-build --dir ${COV_DIR}/cov-int ./gradlew --no-daemon assemble
@@ -59,8 +57,7 @@ pipeline {
         }
         stage('Prep results') {
             steps {
-                sh '''
-                    #!/bin/bash
+                sh '''#!/bin/bash -l
                     cd ${COV_DIR}
                     if [[ -f ${PAYLOAD} ]]; then
                         rm ${PAYLOAD}
@@ -77,8 +74,7 @@ pipeline {
         stage('Upload results') {
             steps {
                 withCredentials([string(credentialsId: 'NETCDF-JAVA_COVERITY', variable: 'TOKEN'), string(credentialsId: 'COVERITY_USER', variable: 'EMAIL')]) {
-                    sh '''
-                        #!/bin/bash
+                    sh '''#!/bin/bash -l
                         PROJECT_VERSION=$(./gradlew --no-daemon properties -q | grep "^version:" | awk '{print $2}')
                         PROJECT_DESCRIPTION=$(./gradlew --no-daemon properties -q | grep "^description:" | awk '{print $2}')
                         PROJECT_GIT_BRANCH=$(git branch | awk '{print $2}')
@@ -99,8 +95,7 @@ pipeline {
         }
         stage('Clean up') {
             steps {
-                sh '''
-                    #!/bin/bash
+                sh '''#!/bin/bash
                     rm -rf *
                 '''
             }
