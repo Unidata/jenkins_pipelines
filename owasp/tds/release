@@ -1,7 +1,7 @@
 pipeline {
     agent  { label 'jenkins-worker' }
     environment {
-        JAVA_HOME = "/usr/thredds-test-environment/temurin11"
+        JAVA_HOME = "/usr/thredds-test-environment/temurin17"
         TO = "thredds-developers@unidata.ucar.edu"
         JOB = "Jenkins build #${env.BUILD_NUMBER} for ${env.JOB_NAME}"
         BUILD_URL ="${env.BUILD_URL}"
@@ -11,7 +11,7 @@ pipeline {
             steps {
                 checkout([
                     $class                           : 'GitSCM',
-                    branches                         : [[name: "refs/tags/v5.5"]],
+                    branches                         : [[name: "refs/tags/v5.6"]],
                     userRemoteConfigs                : [[url: 'https://github.com/Unidata/tds']],
                     extensions                       : [cloneOption(depth: 1, reference: '', shallow: true)],
                     doGenerateSubmoduleConfigurations: false
@@ -21,7 +21,7 @@ pipeline {
         stage('Assemble Project') {
             steps {
                 sh '''#!/bin/bash -l
-                   select-java temurin 11
+                   select-java temurin 17
                    chmod u+x gradlew
                    ./gradlew clean assemble
                 '''
