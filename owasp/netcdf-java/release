@@ -11,7 +11,7 @@ pipeline {
             steps {
                 checkout([
                     $class                           : 'GitSCM',
-                    branches                         : [[name: "refs/tags/v5.8.0"]],
+                    branches                         : [[name: "refs/tags/v5.9.0"]],
                     userRemoteConfigs                : [[url: 'https://github.com/Unidata/netcdf-java']],
                     extensions                       : [cloneOption(depth: 1, reference: '', shallow: true)],
                     doGenerateSubmoduleConfigurations: false
@@ -23,7 +23,7 @@ pipeline {
                 sh '''#!/bin/bash -l
                    select-java temurin 11
                    chmod u+x gradlew
-                   ./gradlew clean assemble
+                   ./gradlew clean assemble -x :cdm:cdm-gcdm:assemble
                 '''
             }
         }
