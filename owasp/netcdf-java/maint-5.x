@@ -21,7 +21,7 @@ pipeline {
         stage('Assemble Project') {
             steps {
                 sh '''#!/bin/bash -l
-                   select-java temurin 11
+                   select-java temurin 17
                    chmod u+x gradlew
                    ./gradlew clean assemble -x :cdm:cdm-gcdm:assemble
                 '''
