@@ -11,7 +11,7 @@ pipeline {
             steps {
                 checkout([
                     $class                           : 'GitSCM',
-                    branches                         : [[name: "refs/tags/v5.7"]],
+                    branches                         : [[name: "refs/tags/${env.TDS_RELEASE_TAG}"]],
                     userRemoteConfigs                : [[url: 'https://github.com/Unidata/tds']],
                     extensions                       : [cloneOption(depth: 1, reference: '', shallow: true)],
                     doGenerateSubmoduleConfigurations: false
@@ -23,7 +23,7 @@ pipeline {
                 sh '''#!/bin/bash -l
                    select-java temurin 17
                    chmod u+x gradlew
-                   ./gradlew clean assemble
+                   ./gradlew clean :tdm:assemble :tds:assemble
                 '''
             }
         }
