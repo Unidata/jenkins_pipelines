@@ -23,7 +23,7 @@ pipeline {
                 sh '''#!/bin/bash -l
                    select-java temurin 17
                    chmod u+x gradlew
-                   ./gradlew clean :tdm:assemble :tds:assemble
+                   ./gradlew clean :tdm:assemble :tds:assemble -x :tds:warGcdm
                 '''
             }
         }
